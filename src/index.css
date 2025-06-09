@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@plugin "daisyui";
+
+@theme {
+  --color-purple: rgb(207, 159, 255);;
+}
