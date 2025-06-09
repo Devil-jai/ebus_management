@@ -6,7 +6,7 @@ import DriverLogout from "./Driver/DriverLogout";
 function Navbar({onLoginClick}) {
   const location = useLocation()
   return (
-<nav className="fixed left-1/2 transform -translate-x-1/2 top-10 w-full max-w-screen-lg px-4 py-2 bg-white shadow-md rounded-md lg:px-8 lg:py-3 z-50">
+<nav className="absolute left-1/2 transform -translate-x-1/2 top-10 w-full max-w-screen-lg px-4 py-2 bg-white shadow-md rounded-md lg:px-8 lg:py-3 z-50">
   <div className="flex  items-center justify-between text-slate-800">
     <a href="#" className="mr-4 block cursor-pointer py-1.5 text-base text-slate-800 font-semibold max-[470px]:text-[12px]">
       Ebus Management
