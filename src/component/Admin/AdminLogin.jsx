@@ -15,13 +15,26 @@ function AdminLogin() {
   const navigate = useNavigate()
   const onSubmit = async ({ email, password }) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      const adminEmail = 'admin@gmail.com'
+
+      if(user.email !== adminEmail){
+        await auth.signOut();
+        toast.error("Unauthorized user. Access denied.")
+        return
+      }
+      console.log("fds");
       toast.success('Login successfully...');
       navigate('/adminPage')
-    } catch (e) {
-     
-      toast.error(e.message);
+    } catch (error) {
+    
+       if (error.code === 'auth/invalid-credential') {
+        toast.error("Admin account not found. Please register or contact the system administrator.");
+      } else {
+        toast.error(error.message);
+      };
     }
   };
 
@@ -29,7 +42,7 @@ function AdminLogin() {
     <div className="font-inter overflow-hidden min-h-screen">
       <section className="flex justify-center relative min-h-screen items-center">
         <img
-          src="https://pagedone.io/asset/uploads/1702362010.png"
+          src="https://images.pexels.com/photos/7135057/pexels-photo-7135057.jpeg?auto=compress&cs=tinysrgb&w=600"
           alt="background"
           className="w-full h-full object-cover fixed inset-0"
         />

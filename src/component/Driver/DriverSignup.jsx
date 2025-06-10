@@ -32,15 +32,19 @@ function DriverSignup() {
 
       toast.success('Driver Created Successfully');
       navigate('/adminPage')
-    } catch (e) {
-      toast.error(e.message);
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error("This user already exists. Please login.");
+      } else {
+        toast.error(error.message);
+      };
     }
   };
 
   return (
     <section className="flex justify-center relative font-inter  min-h-screen">
       <img
-        src="https://pagedone.io/asset/uploads/1702362010.png"
+        src="https://images.pexels.com/photos/7135057/pexels-photo-7135057.jpeg?auto=compress&cs=tinysrgb&w=600"
         alt="gradient background"
         className="w-full h-full object-cover fixed"
       />

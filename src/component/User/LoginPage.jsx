@@ -32,8 +32,11 @@ function LoginPage() {
       }
     }
     catch(error){
-      console.log("Login Error" , error.message);
-      toast.error(error.message)
+      if (error.code === 'auth/invalid-credential') {
+        toast.error("User not found. Please sign up");
+      } else {
+        toast.error(error.message);
+      }
     }
   }
 
@@ -42,7 +45,7 @@ function LoginPage() {
    <div className="font-inter overflow-hidden min-h-screen">
       <section className="flex justify-center relative min-h-screen items-center">
         <img
-          src="https://pagedone.io/asset/uploads/1702362010.png"
+          src="https://images.pexels.com/photos/7135057/pexels-photo-7135057.jpeg?auto=compress&cs=tinysrgb&w=600"
           alt="background"
           className="w-full h-full object-cover fixed inset-0"
         />

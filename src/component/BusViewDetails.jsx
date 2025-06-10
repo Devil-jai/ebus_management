@@ -1,137 +1,118 @@
 import React, { useEffect, useState } from "react";
-import DriverLogout from "./Driver/DriverLogout";
 import { auth, db } from "./Firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { collection, collectionGroup, getDocs } from "firebase/firestore";
+import { collectionGroup, getDocs } from "firebase/firestore";
 
 function BusViewDetails() {
   const [user] = useAuthState(auth);
   const [busList, setBusList] = useState([]);
+  const [filteredList, setFilteredList] = useState([]);
+  const [source, setSource] = useState('');
+  const [destination, setDestination] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAllBusDetails = async () => {
+      setIsLoading(true); // Start loading
       const busDetailsQuery = collectionGroup(db, "busdetails");
-
       const snapshot = await getDocs(busDetailsQuery);
-      const buses = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const buses = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       setBusList(buses);
+      setFilteredList(buses); // Show all by default
+      setIsLoading(false); // Done loading
     };
     fetchAllBusDetails();
   }, [user]);
-  console.log(busList);
+
+  const handleSearch = () => {
+    if (!source.trim() && !destination.trim()) {
+      setFilteredList(busList); // Show all
+    } else {
+      const filtered = busList.filter(bus => {
+        const matchSource = source.trim() === "" || bus.busDetails.source.toLowerCase().includes(source.toLowerCase());
+        const matchDestination = destination.trim() === "" || bus.busDetails.destination.toLowerCase().includes(destination.toLowerCase());
+        return matchSource && matchDestination;
+      });
+      setFilteredList(filtered);
+    }
+  };
+
   return (
-    <>
-     <div className="pt-40 bg-blue-950 h-screen">
-       <div className="relative flex flex-col lg:overflow-x-hidden overflow-scroll   text-gray-700 bg-white shadow-md rounded-xl bg-clip-border ">
-        <table className="w-full text-left table-auto min-w-max ">
+    <div className="pt-10 bg-blue-950 min-h-screen">
+      {/* Search Section */}
+      <div className="flex justify-center sm:flex-row flex-col gap-4 mt-20 mb-6 sm:text-[14px] text-[12px] lg:text-[16px] items-center">
+       <div className="flex justify-center ">
+         <input
+          type="text"
+          placeholder="Source"
+          onChange={(e) => setSource(e.target.value)}
+          className="border rounded px-4 py-2 bg-white md:w-60 w-40 max-[470px]:w-33 h-8 sm:h-9 me-5 placeholder:text-black"
+        />
+        <input
+          type="text"
+          placeholder="Destination"
+          onChange={(e) => setDestination(e.target.value)}
+          className="border rounded px-4 py-2 bg-white md:w-60 w-40 h-8 sm:h-9 max-[470px]:w-33 placeholder:text-black"
+        />
+       </div>
+        <button
+          onClick={handleSearch}
+          className="bg-purple-600 text-white md:px-4 px-3 h-8 rounded hover:bg-purple-700 sm:h-9"
+        >
+          Search
+        </button>
+      </div>
+
+      {/* Table Section */}
+      <div className="relative flex flex-col overflow-x-auto text-gray-700 bg-white shadow-md rounded-xl bg-clip-border mx-4 sm:text-[14px] text-[12px] lg:text-[16px]">
+        <table className="w-full text-left table-auto min-w-max">
           <thead>
             <tr>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  DriverName
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  BusNumber
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Source
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Destination
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Date
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Departure Time
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Arrival Time
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Total Seats
-                </p>
-              </th>
-              <th className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
-                  Driver Contact
-                </p>
-              </th>
+              {[
+                "Driver Name", "Bus Number", "Source", "Destination",
+                "Date", "Departure Time", "Arrival Time", "Total Seats", "Driver Contact"
+              ].map((header, idx) => (
+                <th key={idx} className="p-4 border-b bg-purple-gray-50">
+                  <p className="text-sm font-semibold">{header}</p>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {
-              busList.map((data)=>(
-                <tr>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.driverName}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.busNumber}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.source}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.destination}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.date}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.departureTime}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.arrivalTime}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.seats}
-                </p>
-              </td>
-              <td className="p-4 border-b border-blue-gray-50">
-                <p className="block font-sans text-sm antialiased font-normal leading-normal text-blue-gray-900">
-                  {data.busDetails.contact}
-                </p>
-              </td>
-              
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td colSpan={9} className="text-center p-4 text-purple-600 font-medium">
+                  Loading buses...
+                </td>
+              </tr>
+            ) : filteredList.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="text-center p-4 text-red-600 font-semibold">
+                  No matching buses found.
+                </td>
+              </tr>
+            ) : (
+              filteredList.map((data, i) => (
+                <tr key={data.id || i}>
+                  <td className="p-4 border-b">{data.busDetails.driverName}</td>
+                  <td className="p-4 border-b">{data.busDetails.busNumber}</td>
+                  <td className="p-4 border-b">{data.busDetails.source}</td>
+                  <td className="p-4 border-b">{data.busDetails.destination}</td>
+                  <td className="p-4 border-b">{data.busDetails.date}</td>
+                  <td className="p-4 border-b">{data.busDetails.departureTime}</td>
+                  <td className="p-4 border-b">{data.busDetails.arrivalTime}</td>
+                  <td className="p-4 border-b">{data.busDetails.seats}</td>
+                  <td className="p-4 border-b">{data.busDetails.contact}</td>
+                </tr>
               ))
-            }
-            
+            )}
           </tbody>
         </table>
       </div>
-     </div>
-    </>
+    </div>
   );
 }
 
