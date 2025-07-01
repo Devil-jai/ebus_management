@@ -2,17 +2,20 @@ import React, { useRef, useState, useEffect } from "react";
 import home from "../assets/home_img.jpg";
 import Navbar from "./Navbar";
 import { Link } from "react-router-dom";
-// import AOS from "aos"; // Optional
-// import "aos/dist/aos.css"; // Optional
+import Loader from "./Loader";
 
 function Home() {
   const drawerCheckboxRef = useRef(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
 
-  // Optional: AOS animation init
-  // useEffect(() => {
-  //   AOS.init({ duration: 1000 });
-  // }, []);
+  // Show loading screen for 1 second
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const openDrawer = () => {
     if (drawerCheckboxRef.current) {
@@ -20,11 +23,19 @@ function Home() {
     }
   };
 
+  // If loading, show loading screen
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen  text-2xl ">
+        <Loader/>
+      </div>
+    );
+  }
+
   return (
     <>
       <Navbar onLoginClick={openDrawer} />
 
-      {/* Background Image with Lazy Load */}
       <img
         src={home}
         alt="Background"
@@ -43,14 +54,11 @@ function Home() {
         />
 
         <div className="drawer-content relative">
-          {/* Overlay Content */}
-          <div className="flex justify-center items-center h-screen text-white z-10 relative"
+          <div
+            className="flex justify-center items-center h-screen text-white z-10 relative"
             style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
           >
-            <div
-              className="text-center max-w-4xl px-4"
-              // data-aos="fade-up" // Optional AOS animation
-            >
+            <div className="text-center max-w-4xl px-4">
               <p className="lg:text-2xl sm:text-xl max-[470px]:text-[12px]">
                 E-Bus Management Based Current Location System offers real-time
                 tracking of electric buses, helping passengers and operators
@@ -66,7 +74,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Sidebar Content */}
         <div className="drawer-side z-50">
           <label
             htmlFor="my-drawer-4"
