@@ -6,10 +6,8 @@ import Loader from "./Loader";
 
 function Home() {
   const drawerCheckboxRef = useRef(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
 
-  // Show loading screen for 1 second
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -23,11 +21,10 @@ function Home() {
     }
   };
 
-  // If loading, show loading screen
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen  text-2xl ">
-        <Loader/>
+      <div className="flex items-center justify-center h-screen text-2xl">
+        <Loader />
       </div>
     );
   }
@@ -39,13 +36,10 @@ function Home() {
       <img
         src={home}
         alt="Background"
-        onLoad={() => setImageLoaded(true)}
-        className={`h-screen w-full object-cover fixed top-0 left-0 transition-opacity duration-700 ease-in-out z-0 ${
-          imageLoaded ? "opacity-100" : "opacity-0"
-        }`}
+        className="h-screen w-full object-cover fixed top-0 left-0 z-0"
       />
 
-      <div className="drawer drawer-end ">
+      <div className="drawer drawer-end">
         <input
           id="my-drawer-4"
           type="checkbox"
